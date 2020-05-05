@@ -159,7 +159,53 @@ public:
     }
 };
 
-
+class union_find    //加权union算法，不用构造树就可计算连通图数量,深度小的树加在深度大的树上面
+{
+private:
+    vector<int> sz;
+    vector<int> id;
+    int count;
+    void union_(int p, int q)
+    {
+        int i = find(p);
+        int j = find(q);
+        if (sz[i] > sz[j]) 
+        {
+            id[j] = i;
+        }
+        else
+        { 
+            id[i] = j; 
+            if (sz[i] == sz[j])
+                sz[j] += 1;   
+        }
+        count--;
+    }
+public:
+    union_find(int n) :count(n)
+    {
+        for (int i = 0; i < n; i++)
+        {
+            sz.push_back(1);
+            id.push_back(i);
+        }
+    }
+    int find(int p)
+    {
+        while (id[p] != p)
+        {
+            p = id[p];
+        }
+        return p;
+    }
+    void put(int a, int b)
+    {
+        if (find(a) != find(b))
+        {
+            union_(a, b);
+        }
+    }
+};
 int main()
 {
     Graph graph(12);
