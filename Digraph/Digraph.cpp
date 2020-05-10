@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include<stack>
 using namespace std;
 
 class Digraph
@@ -12,6 +13,7 @@ private:
     vector<vector <int>> adj;
     vector<bool>marked;
     vector<int> edge;
+    stack<int> reverse_post;
     bool hascycle;
     int e, v, count;
     //重置edge,多次利用edge这个数组
@@ -43,6 +45,22 @@ private:
             }
         }
     }
+    //逆后序排序
+    void dfs_reversepost(int s)
+    {
+
+        marked[s] = true;
+        for (int w : adj[s])
+        {
+            if (!marked[w])
+            {
+                edge[w] = s;
+                dfs(w);
+            }
+            reverse_post.push(w);
+
+        }
+    }
     void bfs(int s)
     {
         queue<int> que;
@@ -70,12 +88,20 @@ private:
         {
             if (!marked[w])
                 dfs_cycle(w, s);
-            else if (v != w) hascycle = true;
+            else if (v != w) hascycle = true;       //其实不用判断是否相等，无向图中才需要。
         }
     }
-    void dfs_cycle_stack(int s)
+    void dfs_link(int s, int count)
     {
-
+        marked[s] = true;
+        edge[s] = count;
+        for (int w : adj[s])
+        {
+            if (!marked[w])
+            {
+                dfs_link(w, count);
+            }
+        }
     }
 public:
     Digraph(int v) :v(v), e(0), marked(v, false), edge(v, -1), count(0),hascycle(false)
@@ -93,6 +119,15 @@ public:
     }
     int V() { return v; };
     int E() { return e; };
+    auto dfs_reversepost()
+    {
+        for (int i = 0; i < v; i++)
+        {
+            if (!marked[i])
+                dfs_reversepost(i);
+        }
+        return reverse_post;
+    }
     Digraph reverse()
     {
         Digraph graph(v);
@@ -105,8 +140,29 @@ public:
         }
         return graph;
     }
-   
+    void kosarajuscc()
+    {
+        re_marked();
+        re_edge();
+        Digraph graph = reverse();
+        auto sta = graph.dfs_reversepost();
+        while (!sta.empty())
+        {
+            int i = sta.top();
+            sta.pop();
+            for (int w = 0; w < v; w++) 
+            {
+                if (!marked[w])
+                {
+                    dfs_link(w, count);
+                    count++;
+                }
+            }
+        }
+   }
 };
+
+
 int main()
 {
     std::cout << "Hello World!\n";
